@@ -1,0 +1,15 @@
+[package]
+name = "wireshark-crazyflie"
+version = "0.1.0"
+edition = "2021"
+description = "Wireshark extcap for Crazyflie CRTP protocol"
+license = "MIT OR Apache-2.0"
+
+[[bin]]
+name = "crazyflie-extcap"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+tokio = { version = "1", features = ["full"] }
+pcap-file = "2"
