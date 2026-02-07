@@ -8,7 +8,11 @@ local f_crtp_size = ProtoField.uint8("crtp.size", "Size")
 local f_crtp_undecoded = ProtoField.string("crtp.undecoded", "Undecoded")
 
 -- Specialized CRTP service fields
+
+-- Console fields
 local f_crtp_console_text = ProtoField.string("crtp.console_text", "Text", base.ASCII)
+
+-- Parameter fields
 local f_crtp_parameter_varid = ProtoField.uint16("crtp.parameter_varid", "Variable Id")
 local f_crtp_parameter_type = ProtoField.string("crtp.parameter_type", "Parameter Type")
 local f_crtp_parameter_group = ProtoField.string("crtp.parameter_group", "Parameter Group")
@@ -18,13 +22,67 @@ local f_crtp_parameter_crc = ProtoField.string("crtp.parameter_crc", "Parameter 
 local f_crtp_parameter_val_uint = ProtoField.uint32("crtp.parameter_val_uint", "Value uint")
 local f_crtp_parameter_val_int = ProtoField.int32("crtp.parameter_val_int", "Value int")
 local f_crtp_parameter_val_float = ProtoField.float("crtp.parameter_val_float", "Value float")
+local f_crtp_parameter_misc_cmd = ProtoField.string("crtp.parameter_misc_cmd", "Misc Command")
 
+-- Commander fields (Port 3)
+local f_crtp_commander_roll = ProtoField.float("crtp.commander_roll", "Roll")
+local f_crtp_commander_pitch = ProtoField.float("crtp.commander_pitch", "Pitch")
+local f_crtp_commander_yaw = ProtoField.float("crtp.commander_yaw", "Yaw Rate")
+local f_crtp_commander_thrust = ProtoField.uint16("crtp.commander_thrust", "Thrust")
+
+-- Memory fields (Port 4)
+local f_crtp_memory_cmd = ProtoField.string("crtp.memory_cmd", "Command")
+local f_crtp_memory_id = ProtoField.uint8("crtp.memory_id", "Memory ID")
+local f_crtp_memory_type = ProtoField.string("crtp.memory_type", "Memory Type")
+local f_crtp_memory_size = ProtoField.uint32("crtp.memory_size", "Memory Size")
+local f_crtp_memory_addr = ProtoField.uint64("crtp.memory_addr", "Address")
+local f_crtp_memory_count = ProtoField.uint8("crtp.memory_count", "Memory Count")
+
+-- Log fields
 local f_crtp_log_varid = ProtoField.uint16("crtp.log_varid", "Variable Id")
 local f_crtp_log_type = ProtoField.string("crtp.log_type", "Log Type")
 local f_crtp_log_group = ProtoField.string("crtp.log_group", "Log Group")
 local f_crtp_log_name = ProtoField.string("crtp.log_name", "Log Name")
 local f_crtp_log_count = ProtoField.uint16("crtp.log_count", "Log Count")
 local f_crtp_log_crc = ProtoField.string("crtp.log_crc", "Log CRC")
+local f_crtp_log_block_id = ProtoField.uint8("crtp.log_block_id", "Block ID")
+local f_crtp_log_timestamp = ProtoField.uint32("crtp.log_timestamp", "Timestamp")
+local f_crtp_log_settings_cmd = ProtoField.string("crtp.log_settings_cmd", "Settings Command")
+
+-- Localization fields (Port 6)
+local f_crtp_loc_cmd = ProtoField.string("crtp.loc_cmd", "Command")
+local f_crtp_loc_x = ProtoField.float("crtp.loc_x", "X")
+local f_crtp_loc_y = ProtoField.float("crtp.loc_y", "Y")
+local f_crtp_loc_z = ProtoField.float("crtp.loc_z", "Z")
+local f_crtp_loc_qx = ProtoField.float("crtp.loc_qx", "Quaternion X")
+local f_crtp_loc_qy = ProtoField.float("crtp.loc_qy", "Quaternion Y")
+local f_crtp_loc_qz = ProtoField.float("crtp.loc_qz", "Quaternion Z")
+local f_crtp_loc_qw = ProtoField.float("crtp.loc_qw", "Quaternion W")
+local f_crtp_loc_bs_id = ProtoField.uint8("crtp.loc_bs_id", "Base Station ID")
+
+-- Generic Setpoint fields (Port 7)
+local f_crtp_generic_type = ProtoField.string("crtp.generic_type", "Setpoint Type")
+local f_crtp_generic_vx = ProtoField.float("crtp.generic_vx", "Velocity X")
+local f_crtp_generic_vy = ProtoField.float("crtp.generic_vy", "Velocity Y")
+local f_crtp_generic_vz = ProtoField.float("crtp.generic_vz", "Velocity Z")
+local f_crtp_generic_x = ProtoField.float("crtp.generic_x", "X")
+local f_crtp_generic_y = ProtoField.float("crtp.generic_y", "Y")
+local f_crtp_generic_z = ProtoField.float("crtp.generic_z", "Z")
+local f_crtp_generic_yaw = ProtoField.float("crtp.generic_yaw", "Yaw")
+local f_crtp_generic_yaw_rate = ProtoField.float("crtp.generic_yaw_rate", "Yaw Rate")
+local f_crtp_generic_roll = ProtoField.float("crtp.generic_roll", "Roll")
+local f_crtp_generic_pitch = ProtoField.float("crtp.generic_pitch", "Pitch")
+local f_crtp_generic_thrust = ProtoField.uint16("crtp.generic_thrust", "Thrust")
+local f_crtp_generic_rate_mode = ProtoField.bool("crtp.generic_rate_mode", "Rate Mode")
+local f_crtp_generic_zdist = ProtoField.float("crtp.generic_zdist", "Z Distance")
+
+-- Platform fields (Port 13)
+local f_crtp_platform_cmd = ProtoField.string("crtp.platform_cmd", "Platform Command")
+local f_crtp_platform_version_cmd = ProtoField.string("crtp.platform_version_cmd", "Version Command")
+local f_crtp_platform_protocol_version = ProtoField.uint8("crtp.platform_protocol_version", "Protocol Version")
+local f_crtp_platform_firmware_version = ProtoField.string("crtp.platform_firmware_version", "Firmware Version")
+local f_crtp_platform_device_type = ProtoField.string("crtp.platform_device_type", "Device Type")
+local f_crtp_platform_arm_request = ProtoField.bool("crtp.platform_arm_request", "Arm Request")
 
 local f_crtp_setpoint_hl_command = ProtoField.string("crtp.setpoint_hl_command", "Command")
 local f_crtp_setpoint_hl_retval = ProtoField.uint8("crtp.setpoint_hl_retval", "Return Value")
@@ -45,12 +103,16 @@ local f_crtp_setpoint_hl_z = ProtoField.float("crtp.setpoint_hl_z", "Z")
 
 local f_crtp_echo_data = ProtoField.uint32("crtp.echo_data", "Echo Data")
 
--- All possible fields registred
+-- All possible fields registered
 crtp.fields = {
+	-- General
 	f_crtp_port,
 	f_crtp_channel,
-	f_crtp_console_text,
 	f_crtp_size,
+	f_crtp_undecoded,
+	-- Console
+	f_crtp_console_text,
+	-- Parameters
 	f_crtp_parameter_varid,
 	f_crtp_parameter_val_uint,
 	f_crtp_parameter_val_int,
@@ -60,12 +122,55 @@ crtp.fields = {
 	f_crtp_parameter_type,
 	f_crtp_parameter_count,
 	f_crtp_parameter_crc,
+	f_crtp_parameter_misc_cmd,
+	-- Commander
+	f_crtp_commander_roll,
+	f_crtp_commander_pitch,
+	f_crtp_commander_yaw,
+	f_crtp_commander_thrust,
+	-- Memory
+	f_crtp_memory_cmd,
+	f_crtp_memory_id,
+	f_crtp_memory_type,
+	f_crtp_memory_size,
+	f_crtp_memory_addr,
+	f_crtp_memory_count,
+	-- Logging
 	f_crtp_log_varid,
 	f_crtp_log_name,
 	f_crtp_log_group,
 	f_crtp_log_type,
 	f_crtp_log_count,
 	f_crtp_log_crc,
+	f_crtp_log_block_id,
+	f_crtp_log_timestamp,
+	f_crtp_log_settings_cmd,
+	-- Localization
+	f_crtp_loc_cmd,
+	f_crtp_loc_x,
+	f_crtp_loc_y,
+	f_crtp_loc_z,
+	f_crtp_loc_qx,
+	f_crtp_loc_qy,
+	f_crtp_loc_qz,
+	f_crtp_loc_qw,
+	f_crtp_loc_bs_id,
+	-- Generic Setpoint
+	f_crtp_generic_type,
+	f_crtp_generic_vx,
+	f_crtp_generic_vy,
+	f_crtp_generic_vz,
+	f_crtp_generic_x,
+	f_crtp_generic_y,
+	f_crtp_generic_z,
+	f_crtp_generic_yaw,
+	f_crtp_generic_yaw_rate,
+	f_crtp_generic_roll,
+	f_crtp_generic_pitch,
+	f_crtp_generic_thrust,
+	f_crtp_generic_rate_mode,
+	f_crtp_generic_zdist,
+	-- High-level Setpoint
 	f_crtp_setpoint_hl_command,
 	f_crtp_setpoint_hl_retval,
 	f_crtp_setpoint_hl_use_yaw,
@@ -79,8 +184,15 @@ crtp.fields = {
 	f_crtp_setpoint_hl_z,
 	f_crtp_setpoint_hl_id,
 	f_crtp_setpoint_hl_timescale,
+	-- Platform
+	f_crtp_platform_cmd,
+	f_crtp_platform_version_cmd,
+	f_crtp_platform_protocol_version,
+	f_crtp_platform_firmware_version,
+	f_crtp_platform_device_type,
+	f_crtp_platform_arm_request,
+	-- Link Control
 	f_crtp_echo_data,
-	f_crtp_undecoded,
 }
 
 local param_toc = {}
@@ -194,17 +306,25 @@ function format_address(buffer)
 
 		return addr .. " (" .. port .. ")"
 	elseif link == Links.USB then
-		return buffer(2, 12):bytes():tohex()
+		-- Serial starts at byte 15 (after link_type + direction + address(12) + channel)
+		serial = buffer(15, 16):string():gsub("%z+$", "")  -- trim trailing nulls
+		if serial == "" then
+			return "Crazyflie"
+		end
+		return serial
 	end
 end
 
 function format_device(buffer)
 	if link == Links.RADIO then
-		devid = buffer(8, 1):uint()
-		return "Radio #" .. tostring(devid)
+		-- Serial starts at byte 8 (after link_type + direction + address(5) + channel)
+		serial = buffer(8, 16):string():gsub("%z+$", "")  -- trim trailing nulls
+		if serial == "" then
+			return "Radio"
+		end
+		return "Radio " .. serial
 	elseif link == Links.USB then
-		devid = buffer(15, 1):uint()
-		return "USB #" .. tostring(devid)
+		return "USB"
 	end
 end
 
@@ -221,6 +341,9 @@ function handle_setpoint_highlevel(tree, receive, buffer, channel, size)
 		COMMAND_LAND_2 = 8,
 		COMMAND_TAKEOFF_WITH_VELOCITY = 9,
 		COMMAND_LAND_WITH_VELOCITY = 10,
+		COMMAND_SPIRAL = 11,
+		COMMAND_GO_TO_2 = 12,
+		COMMAND_START_TRAJECTORY_2 = 13,
 	}
 
 	local height = nil
@@ -353,6 +476,64 @@ function handle_setpoint_highlevel(tree, receive, buffer, channel, size)
 		cmd_str = "Take Off With Velocity"
 	elseif cmd == Commands.COMMAND_LAND_WITH_VELOCITY then
 		cmd_str = "Land With Velocity"
+	elseif cmd == Commands.COMMAND_SPIRAL then
+		cmd_str = "Spiral"
+		-- struct data_spiral {
+		--   uint8_t groupMask;
+		--   bool sideways;
+		--   bool clockwise;
+		--   float phi;       // rad
+		--   float r0;        // m (start radius)
+		--   float rf;        // m (final radius)
+		--   float dz;        // m (altitude change)
+		--   float duration;  // s
+		-- } __attribute__((packed));
+		if receive == 0 and size >= 20 then
+			group_mask = buffer(crtp_start + 2, 1):uint()
+			-- sideways and clockwise are at +3 and +4
+			-- phi at +5, r0 at +9, rf at +13, dz at +17, duration at +21
+			undecoded = undecoded - 19
+		end
+	elseif cmd == Commands.COMMAND_GO_TO_2 then
+		cmd_str = "Go To (v2)"
+		-- struct data_go_to_2 {
+		--   uint8_t groupMask;
+		--   uint8_t relative;
+		--   uint8_t linear;      // 0 = smooth trajectory, 1 = straight line
+		--   float x; float y; float z;
+		--   float yaw;
+		--   float duration;
+		-- } __attribute__((packed));
+		if receive == 0 and size >= 24 then
+			group_mask = buffer(crtp_start + 2, 1):uint()
+			relative = buffer(crtp_start + 3, 1):uint()
+			-- linear at +4
+			x = buffer(crtp_start + 5, 4):le_float()
+			y = buffer(crtp_start + 9, 4):le_float()
+			z = buffer(crtp_start + 13, 4):le_float()
+			yaw = buffer(crtp_start + 17, 4):le_float()
+			duration = buffer(crtp_start + 21, 4):le_float()
+			undecoded = undecoded - 24
+		end
+	elseif cmd == Commands.COMMAND_START_TRAJECTORY_2 then
+		cmd_str = "Start Trajectory (v2)"
+		-- struct data_start_trajectory_2 {
+		--   uint8_t groupMask;
+		--   uint8_t relative;
+		--   uint8_t reversed;
+		--   uint8_t trajectoryId;
+		--   float timescale;
+		--   float timeOffset;  // s (added in v2)
+		-- } __attribute__((packed));
+		if receive == 0 and size >= 13 then
+			group_mask = buffer(crtp_start + 2, 1):uint()
+			relative = buffer(crtp_start + 3, 1):uint()
+			-- reversed at +4
+			id = buffer(crtp_start + 5, 1):uint()
+			timescale = buffer(crtp_start + 6, 4):le_float()
+			-- timeOffset at +10
+			undecoded = undecoded - 13
+		end
 	end
 
 	port_tree:add_le(f_crtp_setpoint_hl_command, cmd_str)
@@ -490,7 +671,18 @@ end
 function handle_logging_port(tree, receive, buffer, channel, size)
 	local port_tree = tree:add(crtp, port_name)
 
-	-- TOC
+	local LogSettingsCommands = {
+		[0] = "Create Block (V1)",
+		[1] = "Append Block (V1)",
+		[2] = "Delete Block",
+		[3] = "Start Block",
+		[4] = "Stop Block",
+		[5] = "Reset",
+		[6] = "Create Block (V2)",
+		[7] = "Append Block (V2)",
+	}
+
+	-- TOC (Channel 0)
 	if channel == 0 then
 		message_id = buffer(crtp_start + 1, 1):le_uint()
 		if message_id == 3 and receive == 1 then
@@ -529,11 +721,63 @@ function handle_logging_port(tree, receive, buffer, channel, size)
 				port_tree:add_le(f_crtp_log_name, item["name"])
 			end
 		end
+	-- Settings (Channel 1)
+	elseif channel == 1 then
+		if size >= 2 then
+			local cmd = buffer(crtp_start + 1, 1):le_uint()
+			local cmd_name = LogSettingsCommands[cmd] or "Unknown"
+			port_tree:add_le(f_crtp_log_settings_cmd, cmd_name .. " (" .. cmd .. ")")
+
+			if size >= 3 then
+				local block_id = buffer(crtp_start + 2, 1):le_uint()
+				port_tree:add_le(f_crtp_log_block_id, block_id)
+				undecoded = undecoded - 2
+
+				-- For Create Block V2 (cmd 6) and Append Block V2 (cmd 7)
+				if (cmd == 6 or cmd == 7) and size > 3 then
+					-- Contains variable IDs and types
+					-- Each variable entry is 3 bytes: type (1) + varid (2)
+					undecoded = undecoded - (size - 3)
+				-- For Start Block (cmd 3)
+				elseif cmd == 3 and size >= 4 then
+					-- Period in 10ms units
+					local period = buffer(crtp_start + 3, 1):le_uint() * 10
+					undecoded = undecoded - 1
+				end
+			else
+				undecoded = undecoded - 1
+			end
+		end
+	-- Log data (Channel 2)
+	elseif channel == 2 then
+		if size >= 4 then
+			local block_id = buffer(crtp_start + 1, 1):le_uint()
+			-- Timestamp is 24-bit little-endian (3 bytes)
+			local ts_low = buffer(crtp_start + 2, 1):le_uint()
+			local ts_mid = buffer(crtp_start + 3, 1):le_uint()
+			local ts_high = buffer(crtp_start + 4, 1):le_uint()
+			local timestamp = ts_low + ts_mid * 256 + ts_high * 65536
+
+			port_tree:add_le(f_crtp_log_block_id, block_id)
+			port_tree:add_le(f_crtp_log_timestamp, timestamp):append_text(" ms")
+			undecoded = undecoded - 4
+			-- Remaining bytes are packed log variable values
+		end
 	end
 end
 
 function handle_parameter_port(tree, receive, buffer, channel, size)
 	local port_tree = tree:add(crtp, port_name)
+
+	local ParamMiscCommands = {
+		[0] = "Set By Name",
+		[1] = "Value Updated",
+		[2] = "Get Extended Type",
+		[3] = "Persistent Store",
+		[4] = "Persistent Get State",
+		[5] = "Persistent Clear",
+		[6] = "Get Default Value",
+	}
 
 	-- Read or Write
 	if (channel == 1 or channel == 2) and size > 2 then
@@ -601,19 +845,386 @@ function handle_parameter_port(tree, receive, buffer, channel, size)
 			end
 		end
 	end
+	-- Misc channel
+	if channel == 3 and size >= 2 then
+		local cmd = buffer(crtp_start + 1, 1):le_uint()
+		local cmd_name = ParamMiscCommands[cmd] or "Unknown"
+		port_tree:add_le(f_crtp_parameter_misc_cmd, cmd_name .. " (" .. cmd .. ")")
+		undecoded = undecoded - 1
+
+		-- For Set By Name (cmd 0), the rest is group\0name\0value
+		-- For Value Updated (cmd 1), contains varid
+		if cmd == 1 and size >= 4 then
+			local var_id = buffer(crtp_start + 2, 2):le_uint()
+			port_tree:add_le(f_crtp_parameter_varid, var_id)
+			undecoded = undecoded - 2
+		end
+	end
+end
+
+function handle_commander_port(tree, receive, buffer, channel, size)
+	-- Commander port sends RPYT (Roll, Pitch, Yaw-rate, Thrust) setpoints
+	-- Format: 4 floats (roll, pitch, yaw_rate) + 1 uint16 (thrust) = 14 bytes
+	local port_tree = tree:add(crtp, port_name)
+
+	if size >= 14 then
+		local roll = buffer(crtp_start + 1, 4):le_float()
+		local pitch = buffer(crtp_start + 5, 4):le_float()
+		local yaw_rate = buffer(crtp_start + 9, 4):le_float()
+		local thrust = buffer(crtp_start + 13, 2):le_uint()
+
+		port_tree:add_le(f_crtp_commander_roll, roll):append_text(" (deg)")
+		port_tree:add_le(f_crtp_commander_pitch, pitch):append_text(" (deg)")
+		port_tree:add_le(f_crtp_commander_yaw, yaw_rate):append_text(" (deg/s)")
+		port_tree:add_le(f_crtp_commander_thrust, thrust)
+
+		undecoded = undecoded - 14
+	end
+end
+
+function handle_memory_port(tree, receive, buffer, channel, size)
+	local port_tree = tree:add(crtp, port_name)
+
+	local MemoryTypes = {
+		[0x00] = "I2C",
+		[0x01] = "1-Wire",
+		[0x10] = "Driver LED",
+		[0x11] = "Loco",
+		[0x12] = "Trajectory",
+		[0x13] = "Loco2",
+		[0x14] = "Lighthouse",
+		[0x15] = "Memory Tester",
+		[0x17] = "Driver LED Timing",
+		[0x18] = "App",
+		[0x19] = "Deck Memory",
+		[0x1A] = "Deck Multiranger",
+		[0x1B] = "Deck PAA3905",
+		[0x20] = "DeckCtrl DFU",
+		[0x21] = "DeckCtrl",
+	}
+
+	-- Channel 0: Info/TOC
+	if channel == 0 then
+		if size >= 2 then
+			local cmd = buffer(crtp_start + 1, 1):le_uint()
+			if cmd == 1 then
+				port_tree:add_le(f_crtp_memory_cmd, "Get Memory Count")
+				if receive == 1 and size >= 3 then
+					port_tree:add_le(f_crtp_memory_count, buffer(crtp_start + 2, 1):le_uint())
+					undecoded = undecoded - 2
+				else
+					undecoded = undecoded - 1
+				end
+			elseif cmd == 2 then
+				port_tree:add_le(f_crtp_memory_cmd, "Get Memory Info")
+				if size >= 3 then
+					local mem_id = buffer(crtp_start + 2, 1):le_uint()
+					port_tree:add_le(f_crtp_memory_id, mem_id)
+					undecoded = undecoded - 2
+
+					if receive == 1 and size >= 12 then
+						local mem_type = buffer(crtp_start + 3, 1):le_uint()
+						local type_name = MemoryTypes[mem_type] or "Unknown"
+						port_tree:add_le(f_crtp_memory_type, mem_type .. " (" .. type_name .. ")")
+						local mem_size = buffer(crtp_start + 4, 4):le_uint()
+						port_tree:add_le(f_crtp_memory_size, mem_size):append_text(" bytes")
+						local mem_addr = buffer(crtp_start + 8, 8):le_uint64()
+						port_tree:add_le(f_crtp_memory_addr, mem_addr)
+						undecoded = undecoded - 10
+					end
+				end
+			end
+		end
+	-- Channel 1: Read
+	elseif channel == 1 then
+		port_tree:add_le(f_crtp_memory_cmd, "Read")
+		if size >= 7 then
+			local mem_id = buffer(crtp_start + 1, 1):le_uint()
+			local addr = buffer(crtp_start + 2, 4):le_uint()
+			port_tree:add_le(f_crtp_memory_id, mem_id)
+			port_tree:add_le(f_crtp_memory_addr, addr)
+			undecoded = undecoded - 5
+		end
+	-- Channel 2: Write
+	elseif channel == 2 then
+		port_tree:add_le(f_crtp_memory_cmd, "Write")
+		if size >= 7 then
+			local mem_id = buffer(crtp_start + 1, 1):le_uint()
+			local addr = buffer(crtp_start + 2, 4):le_uint()
+			port_tree:add_le(f_crtp_memory_id, mem_id)
+			port_tree:add_le(f_crtp_memory_addr, addr)
+			undecoded = undecoded - 5
+		end
+	end
+end
+
+function handle_localization_port(tree, receive, buffer, channel, size)
+	local port_tree = tree:add(crtp, port_name)
+
+	local LocalizationTypes = {
+		[0] = "Range Stream Report",
+		[1] = "Range Stream Report FP16",
+		[2] = "LPS Short LPP Packet",
+		[3] = "Emergency Stop",
+		[4] = "Emergency Stop Watchdog",
+		[6] = "GNSS NMEA",
+		[7] = "GNSS Proprietary",
+		[8] = "External Pose",
+		[9] = "External Pose Packed",
+		[10] = "Lighthouse Angle Stream",
+		[11] = "Lighthouse Persist Data",
+	}
+
+	-- Channel 0: External Position
+	if channel == 0 then
+		port_tree:add_le(f_crtp_loc_cmd, "External Position")
+		if size >= 13 then
+			local x = buffer(crtp_start + 1, 4):le_float()
+			local y = buffer(crtp_start + 5, 4):le_float()
+			local z = buffer(crtp_start + 9, 4):le_float()
+
+			port_tree:add_le(f_crtp_loc_x, x):append_text(" (m)")
+			port_tree:add_le(f_crtp_loc_y, y):append_text(" (m)")
+			port_tree:add_le(f_crtp_loc_z, z):append_text(" (m)")
+			undecoded = undecoded - 12
+		end
+	-- Channel 1: Generic localization
+	elseif channel == 1 then
+		if size >= 2 then
+			local cmd_type = buffer(crtp_start + 1, 1):le_uint()
+			local type_name = LocalizationTypes[cmd_type] or "Unknown"
+			port_tree:add_le(f_crtp_loc_cmd, type_name .. " (" .. cmd_type .. ")")
+
+			if cmd_type == 3 then
+				-- Emergency Stop
+				undecoded = undecoded - 1
+			elseif cmd_type == 4 then
+				-- Emergency Stop Watchdog
+				undecoded = undecoded - 1
+			elseif cmd_type == 8 and size >= 29 then
+				-- External Pose: x, y, z, qx, qy, qz, qw (7 floats)
+				local x = buffer(crtp_start + 2, 4):le_float()
+				local y = buffer(crtp_start + 6, 4):le_float()
+				local z = buffer(crtp_start + 10, 4):le_float()
+				local qx = buffer(crtp_start + 14, 4):le_float()
+				local qy = buffer(crtp_start + 18, 4):le_float()
+				local qz = buffer(crtp_start + 22, 4):le_float()
+				local qw = buffer(crtp_start + 26, 4):le_float()
+
+				port_tree:add_le(f_crtp_loc_x, x):append_text(" (m)")
+				port_tree:add_le(f_crtp_loc_y, y):append_text(" (m)")
+				port_tree:add_le(f_crtp_loc_z, z):append_text(" (m)")
+				port_tree:add_le(f_crtp_loc_qx, qx)
+				port_tree:add_le(f_crtp_loc_qy, qy)
+				port_tree:add_le(f_crtp_loc_qz, qz)
+				port_tree:add_le(f_crtp_loc_qw, qw)
+				undecoded = undecoded - 28
+			elseif cmd_type == 10 and size >= 22 then
+				-- Lighthouse Angle Stream
+				local bs_id = buffer(crtp_start + 2, 1):le_uint()
+				port_tree:add_le(f_crtp_loc_bs_id, bs_id)
+				undecoded = undecoded - 2
+			elseif cmd_type == 11 and size >= 5 then
+				-- Lighthouse Persist Data
+				undecoded = undecoded - 4
+			end
+		end
+	end
+end
+
+function handle_generic_setpoint_port(tree, receive, buffer, channel, size)
+	local port_tree = tree:add(crtp, port_name)
+
+	local SetpointTypes = {
+		[0] = "Stop",
+		[1] = "Velocity World (Legacy)",
+		[2] = "Z Distance (Legacy)",
+		[3] = "CPPM Emulation",
+		[4] = "Alt Hold",
+		[5] = "Hover (Legacy)",
+		[6] = "Full State",
+		[7] = "Position",
+		[8] = "Velocity World",
+		[9] = "Z Distance",
+		[10] = "Hover",
+		[11] = "Manual",
+	}
+
+	-- Channel 0: Setpoint data
+	if channel == 0 then
+		if size >= 2 then
+			local sp_type = buffer(crtp_start + 1, 1):le_uint()
+			local type_name = SetpointTypes[sp_type] or "Unknown"
+			port_tree:add_le(f_crtp_generic_type, type_name .. " (" .. sp_type .. ")")
+
+			if sp_type == 0 then
+				-- Stop
+				undecoded = undecoded - 1
+			elseif sp_type == 6 and size >= 30 then
+				-- Full State: x, y, z (i16 mm), vx, vy, vz (i16 mm/s), ax, ay, az (i16 mm/s^2),
+				-- quat (compressed), rollRate, pitchRate, yawRate (i16)
+				-- This is a complex compressed format
+				local x = buffer(crtp_start + 2, 2):le_int() / 1000.0
+				local y = buffer(crtp_start + 4, 2):le_int() / 1000.0
+				local z = buffer(crtp_start + 6, 2):le_int() / 1000.0
+
+				port_tree:add_le(f_crtp_generic_x, x):append_text(" (m)")
+				port_tree:add_le(f_crtp_generic_y, y):append_text(" (m)")
+				port_tree:add_le(f_crtp_generic_z, z):append_text(" (m)")
+
+				local vx = buffer(crtp_start + 8, 2):le_int() / 1000.0
+				local vy = buffer(crtp_start + 10, 2):le_int() / 1000.0
+				local vz = buffer(crtp_start + 12, 2):le_int() / 1000.0
+
+				port_tree:add_le(f_crtp_generic_vx, vx):append_text(" (m/s)")
+				port_tree:add_le(f_crtp_generic_vy, vy):append_text(" (m/s)")
+				port_tree:add_le(f_crtp_generic_vz, vz):append_text(" (m/s)")
+				undecoded = undecoded - 29
+			elseif sp_type == 7 and size >= 18 then
+				-- Position: x, y, z, yaw (4 floats)
+				local x = buffer(crtp_start + 2, 4):le_float()
+				local y = buffer(crtp_start + 6, 4):le_float()
+				local z = buffer(crtp_start + 10, 4):le_float()
+				local yaw = buffer(crtp_start + 14, 4):le_float()
+
+				port_tree:add_le(f_crtp_generic_x, x):append_text(" (m)")
+				port_tree:add_le(f_crtp_generic_y, y):append_text(" (m)")
+				port_tree:add_le(f_crtp_generic_z, z):append_text(" (m)")
+				port_tree:add_le(f_crtp_generic_yaw, yaw):append_text(" (deg)")
+				undecoded = undecoded - 17
+			elseif sp_type == 8 and size >= 18 then
+				-- Velocity World: vx, vy, vz, yaw_rate (4 floats)
+				local vx = buffer(crtp_start + 2, 4):le_float()
+				local vy = buffer(crtp_start + 6, 4):le_float()
+				local vz = buffer(crtp_start + 10, 4):le_float()
+				local yaw_rate = buffer(crtp_start + 14, 4):le_float()
+
+				port_tree:add_le(f_crtp_generic_vx, vx):append_text(" (m/s)")
+				port_tree:add_le(f_crtp_generic_vy, vy):append_text(" (m/s)")
+				port_tree:add_le(f_crtp_generic_vz, vz):append_text(" (m/s)")
+				port_tree:add_le(f_crtp_generic_yaw_rate, yaw_rate):append_text(" (deg/s)")
+				undecoded = undecoded - 17
+			elseif sp_type == 9 and size >= 18 then
+				-- Z Distance: roll, pitch, yaw_rate, z_distance (4 floats)
+				local roll = buffer(crtp_start + 2, 4):le_float()
+				local pitch = buffer(crtp_start + 6, 4):le_float()
+				local yaw_rate = buffer(crtp_start + 10, 4):le_float()
+				local zdist = buffer(crtp_start + 14, 4):le_float()
+
+				port_tree:add_le(f_crtp_generic_roll, roll):append_text(" (deg)")
+				port_tree:add_le(f_crtp_generic_pitch, pitch):append_text(" (deg)")
+				port_tree:add_le(f_crtp_generic_yaw_rate, yaw_rate):append_text(" (deg/s)")
+				port_tree:add_le(f_crtp_generic_zdist, zdist):append_text(" (m)")
+				undecoded = undecoded - 17
+			elseif sp_type == 10 and size >= 18 then
+				-- Hover: vx, vy, yaw_rate, z_distance (4 floats)
+				local vx = buffer(crtp_start + 2, 4):le_float()
+				local vy = buffer(crtp_start + 6, 4):le_float()
+				local yaw_rate = buffer(crtp_start + 10, 4):le_float()
+				local zdist = buffer(crtp_start + 14, 4):le_float()
+
+				port_tree:add_le(f_crtp_generic_vx, vx):append_text(" (m/s, body)")
+				port_tree:add_le(f_crtp_generic_vy, vy):append_text(" (m/s, body)")
+				port_tree:add_le(f_crtp_generic_yaw_rate, yaw_rate):append_text(" (deg/s)")
+				port_tree:add_le(f_crtp_generic_zdist, zdist):append_text(" (m)")
+				undecoded = undecoded - 17
+			elseif sp_type == 11 and size >= 18 then
+				-- Manual: roll, pitch, yaw_rate, thrust, rate_mode
+				local roll = buffer(crtp_start + 2, 4):le_float()
+				local pitch = buffer(crtp_start + 6, 4):le_float()
+				local yaw_rate = buffer(crtp_start + 10, 4):le_float()
+				local thrust = buffer(crtp_start + 14, 2):le_uint()
+				local rate_mode = buffer(crtp_start + 16, 1):le_uint()
+
+				port_tree:add_le(f_crtp_generic_roll, roll):append_text(" (deg)")
+				port_tree:add_le(f_crtp_generic_pitch, pitch):append_text(" (deg)")
+				port_tree:add_le(f_crtp_generic_yaw_rate, yaw_rate):append_text(" (deg/s)")
+				port_tree:add_le(f_crtp_generic_thrust, thrust)
+				port_tree:add_le(f_crtp_generic_rate_mode, rate_mode)
+				undecoded = undecoded - 16
+			end
+		end
+	-- Channel 1: Meta commands
+	elseif channel == 1 then
+		if size >= 2 then
+			local cmd_type = buffer(crtp_start + 1, 1):le_uint()
+			if cmd_type == 0 then
+				port_tree:add_le(f_crtp_generic_type, "Notify Setpoint Stop")
+				undecoded = undecoded - 1
+			end
+		end
+	end
+end
+
+function handle_platform_port(tree, receive, buffer, channel, size)
+	local port_tree = tree:add(crtp, port_name)
+
+	-- Channel 0: Platform commands
+	if channel == 0 then
+		if size >= 2 then
+			local cmd = buffer(crtp_start + 1, 1):le_uint()
+			local PlatformCommands = {
+				[0] = "Set Continuous Wave",
+				[1] = "Request Arming",
+				[2] = "Request Crash Recovery",
+				[4] = "Set Crazyflie Name",
+			}
+			local cmd_name = PlatformCommands[cmd] or "Unknown"
+			port_tree:add_le(f_crtp_platform_cmd, cmd_name .. " (" .. cmd .. ")")
+
+			if cmd == 1 and size >= 3 then
+				local arm = buffer(crtp_start + 2, 1):le_uint()
+				port_tree:add_le(f_crtp_platform_arm_request, arm ~= 0)
+				undecoded = undecoded - 2
+			else
+				undecoded = undecoded - 1
+			end
+		end
+	-- Channel 1: Version commands
+	elseif channel == 1 then
+		if size >= 2 then
+			local cmd = buffer(crtp_start + 1, 1):le_uint()
+			local VersionCommands = {
+				[0] = "Get Protocol Version",
+				[1] = "Get Firmware Version",
+				[2] = "Get Device Type",
+			}
+			local cmd_name = VersionCommands[cmd] or "Unknown"
+			port_tree:add_le(f_crtp_platform_version_cmd, cmd_name .. " (" .. cmd .. ")")
+
+			if cmd == 0 and receive == 1 and size >= 3 then
+				local version = buffer(crtp_start + 2, 1):le_uint()
+				port_tree:add_le(f_crtp_platform_protocol_version, version)
+				undecoded = undecoded - 2
+			elseif cmd == 1 and receive == 1 and size > 2 then
+				local fw_version = buffer(crtp_start + 2):string()
+				port_tree:add_le(f_crtp_platform_firmware_version, fw_version)
+				undecoded = 0
+			elseif cmd == 2 and receive == 1 and size > 2 then
+				local device_type = buffer(crtp_start + 2):string()
+				port_tree:add_le(f_crtp_platform_device_type, device_type)
+				undecoded = 0
+			else
+				undecoded = undecoded - 1
+			end
+		end
+	-- Channel 2: App channel
+	elseif channel == 2 then
+		port_tree:add_le(f_crtp_platform_cmd, "App Channel Data")
+	end
 end
 
 -- create a function to dissect it, layout:
--- | link_type | receive| address       | channel | radio devid | crtp header | crtp data |
--- | 1 byte    | 1 byte | 5 or 12 bytes |  1 byte |    1 byte   |    1 byte   |   n bytes |
+-- | link_type | receive| address       | channel | serial   | crtp header | crtp data |
+-- | 1 byte    | 1 byte | 5 or 12 bytes |  1 byte | 16 bytes |    1 byte   |   n bytes |
 function crtp.dissector(buffer, pinfo, tree)
 	pinfo.cols.protocol = "CRTP"
 
 	link = buffer(0, 1):uint()
 	if link == Links.RADIO then
-		crtp_start = 9
+		crtp_start = 24  -- 1+1+5+1+16
 	elseif link == Links.USB then
-		crtp_start = 16
+		crtp_start = 31  -- 1+1+12+1+16
 	end
 
 	if buffer:len() <= crtp_start then
@@ -635,7 +1246,7 @@ function crtp.dissector(buffer, pinfo, tree)
 	local crtp_channel = bit.band(header, 0x03)
 
 	-- Add CRTP packet size:
-	-- receive_byte + address + channel + devid = 8
+	-- link_type + receive + address + channel + serial = crtp_start
 	-- Rest is CRTP packet
 	local crtp_size = buffer:len() - crtp_start
 	subtree:add_le(f_crtp_size, crtp_size)
@@ -683,12 +1294,32 @@ function crtp.dissector(buffer, pinfo, tree)
 		handle_parameter_port(tree, receive, buffer, crtp_channel, crtp_size)
 	end
 
+	if crtp_port == Ports.Commander then
+		handle_commander_port(tree, receive, buffer, crtp_channel, crtp_size)
+	end
+
+	if crtp_port == Ports.Memory then
+		handle_memory_port(tree, receive, buffer, crtp_channel, crtp_size)
+	end
+
 	if crtp_port == Ports.Logging then
 		handle_logging_port(tree, receive, buffer, crtp_channel, crtp_size)
 	end
 
+	if crtp_port == Ports.Localization then
+		handle_localization_port(tree, receive, buffer, crtp_channel, crtp_size)
+	end
+
+	if crtp_port == Ports.Commander_Generic then
+		handle_generic_setpoint_port(tree, receive, buffer, crtp_channel, crtp_size)
+	end
+
 	if crtp_port == Ports.Setpoint_Highlevel then
 		handle_setpoint_highlevel(tree, receive, buffer, crtp_channel, crtp_size)
+	end
+
+	if crtp_port == Ports.Platform then
+		handle_platform_port(tree, receive, buffer, crtp_channel, crtp_size)
 	end
 
 	if undecoded > 0 then

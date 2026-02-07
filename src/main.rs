@@ -7,18 +7,26 @@
 use clap::Parser;
 use pcap_file::pcap::{PcapHeader, PcapPacket, PcapWriter};
 use std::fs::File;
-use std::io::{Read, Write};
-use std::os::unix::net::UnixListener;
+use std::io::Read;
+use std::os::unix::net::{UnixListener, UnixStream};
 use std::path::PathBuf;
+use std::sync::mpsc::{self, Sender};
+use std::thread;
 
 /// Wireshark extcap interface name
 const INTERFACE_NAME: &str = "crazyflie";
 /// Wireshark extcap interface description
 const INTERFACE_DESC: &str = "Crazyflie CRTP";
 /// Unix socket path for receiving packets from clients
-const SOCKET_PATH: &str = "/tmp/crazyflie-wireshark.sock";
+const SOCKET_PATH: &str = "/tmp/crazyflie-capture.sock";
 /// Wireshark USER15 data link type (147)
 const DLT_USER15: u32 = 162;
+
+/// Packet data sent from client handlers to the PCAP writer
+struct CapturedPacket {
+    timestamp_us: u64,
+    data: Vec<u8>,
+}
 
 #[derive(Parser)]
 #[command(name = "crazyflie-extcap")]
@@ -134,30 +142,58 @@ fn run_capture(fifo_path: &PathBuf) {
 
     eprintln!("Crazyflie extcap: listening on {}", SOCKET_PATH);
 
-    // Accept connections and forward packets
-    for stream in listener.incoming() {
-        match stream {
-            Ok(mut stream) => {
-                eprintln!("Crazyflie extcap: client connected");
-                handle_client(&mut stream, &mut pcap_writer);
+    // Create channel for packets from client handlers
+    let (tx, rx) = mpsc::channel::<CapturedPacket>();
+
+    // Spawn thread to accept connections
+    thread::spawn(move || {
+        let mut client_id = 0u32;
+        for stream in listener.incoming() {
+            match stream {
+                Ok(stream) => {
+                    client_id += 1;
+                    eprintln!("Crazyflie extcap: client {} connected", client_id);
+                    let tx = tx.clone();
+                    let id = client_id;
+                    thread::spawn(move || {
+                        handle_client(stream, tx, id);
+                    });
+                }
+                Err(e) => {
+                    eprintln!("Connection error: {}", e);
+                }
             }
-            Err(e) => {
-                eprintln!("Connection error: {}", e);
-            }
+        }
+    });
+
+    // Main thread: receive packets and write to PCAP
+    for packet in rx {
+        let ts_sec = (packet.timestamp_us / 1_000_000) as u32;
+        let ts_usec = (packet.timestamp_us % 1_000_000) as u32;
+
+        let pcap_packet = PcapPacket::new(
+            std::time::Duration::new(ts_sec as u64, ts_usec * 1000),
+            packet.data.len() as u32,
+            &packet.data,
+        );
+
+        if let Err(e) = pcap_writer.write_packet(&pcap_packet) {
+            eprintln!("Error writing PCAP packet: {}", e);
+            break;
         }
     }
 }
 
-/// Handle a connected client, reading packets and writing to PCAP
-fn handle_client<W: Write>(stream: &mut std::os::unix::net::UnixStream, pcap_writer: &mut PcapWriter<W>) {
-    let mut header_buf = [0u8; 26]; // link_type(1) + direction(1) + address(12) + channel(1) + devid(1) + timestamp(8) + len(2)
+/// Handle a connected client, reading packets and sending to channel
+fn handle_client(mut stream: UnixStream, tx: Sender<CapturedPacket>, client_id: u32) {
+    let mut header_buf = [0u8; 41]; // link_type(1) + direction(1) + address(12) + channel(1) + serial(16) + timestamp(8) + len(2)
 
     loop {
         // Read packet header
         match stream.read_exact(&mut header_buf) {
             Ok(_) => {}
             Err(e) if e.kind() == std::io::ErrorKind::UnexpectedEof => {
-                eprintln!("Crazyflie extcap: client disconnected");
+                eprintln!("Crazyflie extcap: client {} disconnected", client_id);
                 break;
             }
             Err(e) => {
@@ -171,9 +207,9 @@ fn handle_client<W: Write>(stream: &mut std::os::unix::net::UnixStream, pcap_wri
         let direction = header_buf[1];
         let address = &header_buf[2..14];
         let channel = header_buf[14];
-        let devid = header_buf[15];
-        let timestamp_us = u64::from_le_bytes(header_buf[16..24].try_into().unwrap());
-        let data_len = u16::from_le_bytes(header_buf[24..26].try_into().unwrap()) as usize;
+        let serial = &header_buf[15..31];
+        let timestamp_us = u64::from_le_bytes(header_buf[31..39].try_into().unwrap());
+        let data_len = u16::from_le_bytes(header_buf[39..41].try_into().unwrap()) as usize;
 
         // Read packet data
         let mut data = vec![0u8; data_len];
@@ -183,29 +219,22 @@ fn handle_client<W: Write>(stream: &mut std::os::unix::net::UnixStream, pcap_wri
         }
 
         // Build dissector-compatible packet format:
-        // | link_type | direction | address (5 or 12) | channel | devid | crtp_data |
+        // | link_type | direction | address (5 or 12) | channel | serial (16) | crtp_data |
         let address_len = if link_type == 1 { 5 } else { 12 }; // Radio=1 uses 5 bytes, USB=2 uses 12
-        let mut pcap_data = Vec::with_capacity(1 + 1 + address_len + 1 + 1 + data.len());
+        let mut pcap_data = Vec::with_capacity(1 + 1 + address_len + 1 + 16 + data.len());
         pcap_data.push(link_type);
         pcap_data.push(direction);
         pcap_data.extend_from_slice(&address[..address_len]);
         pcap_data.push(channel);
-        pcap_data.push(devid);
+        pcap_data.extend_from_slice(serial);
         pcap_data.extend_from_slice(&data);
 
-        // Convert timestamp
-        let ts_sec = (timestamp_us / 1_000_000) as u32;
-        let ts_usec = (timestamp_us % 1_000_000) as u32;
-
-        // Write PCAP packet
-        let packet = PcapPacket::new(
-            std::time::Duration::new(ts_sec as u64, ts_usec * 1000),
-            pcap_data.len() as u32,
-            &pcap_data,
-        );
-
-        if let Err(e) = pcap_writer.write_packet(&packet) {
-            eprintln!("Error writing PCAP packet: {}", e);
+        // Send packet to main thread for PCAP writing
+        if tx.send(CapturedPacket {
+            timestamp_us,
+            data: pcap_data,
+        }).is_err() {
+            // Receiver dropped, stop processing
             break;
         }
     }
