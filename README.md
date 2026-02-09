@@ -63,13 +63,13 @@ The application must call `crazyflie_link::capture::init()` before establishing 
 ┌─────────────────┐     Unix Socket      ┌──────────────────┐     FIFO     ┌───────────┐
 │  Your App       │ ──────────────────── │ crazyflie-extcap │ ──────────── │ Wireshark │
 │ (crazyflie-link)│   /tmp/crazyflie-    │                  │    PCAP      │           │
-│                 │   wireshark.sock     │                  │   packets    │           │
+│                 │   capture.sock       │                  │   packets    │           │
 └─────────────────┘                      └──────────────────┘              └───────────┘
 ```
 
 1. When Wireshark starts capturing on the "Crazyflie CRTP" interface, it launches the extcap
-2. The extcap creates a Unix socket at `/tmp/crazyflie-wireshark.sock`
-3. Your application (with `wireshark` feature) connects to this socket
+2. The extcap creates a Unix socket at `/tmp/crazyflie-capture.sock`
+3. Your application (with `packet_capture` feature) connects to this socket
 4. Packets are forwarded from your app → extcap → Wireshark
 5. The Lua dissector decodes the CRTP protocol fields
 
