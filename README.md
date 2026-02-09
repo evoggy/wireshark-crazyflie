@@ -48,11 +48,11 @@ ln -s "$(pwd)/dissector/crtp-dissector.lua" ~/.local/lib/wireshark/plugins/
 
 ## Building applications with capture support
 
-To enable packet capture in your application, build with the `wireshark` feature:
+To enable packet capture in your application, build with the `packet_capture` feature:
 
 ```bash
 # For crazyflie-link based applications
-cargo build --features wireshark
+cargo build --features packet_capture
 ```
 
 The application must call `crazyflie_link::capture::init()` before establishing connections.
