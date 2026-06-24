@@ -1271,15 +1271,8 @@ function crtp.dissector(buffer, pinfo, tree)
 	-- Get port and channel name
 	port_name, channel_name = get_crtp_port_channel_names(crtp_port, crtp_channel)
 
-	-- Check for safelink packet
-	if crtp_size == 3 and header == 0xF3 and buffer(crtp_start + 1, 1):uint() == 0x05 then
-		pinfo.cols.info = "SafeLink"
-		subtree:add_le(f_crtp_safelink_packet, true)
-		-- return
-	else
-		-- Display port in info column
-		pinfo.cols.info = port_name
-	end
+	-- Display port in info column
+	pinfo.cols.info = port_name
 
 	-- Add to CRTP tree
 	subtree:add_le(f_crtp_port, crtp_port):append_text(" (" .. port_name .. ")")
@@ -1303,6 +1296,8 @@ function crtp.dissector(buffer, pinfo, tree)
 			local port_tree = tree:add(crtp, channel_name)
 			port_tree:add_le(f_crtp_echo_data, buffer(crtp_start + 1):le_uint())
 			undecoded = 0
+		elseif crtp_channel == 3 and crtp_size == 3 and buffer(crtp_start + 1, 1):uint() == 0x05 then -- Low level safelink packet
+			subtree:add_le(f_crtp_safelink_packet, true)
 		end
 	end
 
