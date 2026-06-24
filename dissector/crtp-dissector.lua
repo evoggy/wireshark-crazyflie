@@ -111,6 +111,8 @@ crtp.fields = {
 	-- General
 	f_crtp_port,
 	f_crtp_channel,
+	f_crtp_safelink_up,
+	f_crtp_safelink_down,
 	f_crtp_size,
 	f_crtp_undecoded,
 	-- Console
@@ -196,10 +198,7 @@ crtp.fields = {
 	f_crtp_platform_arm_request,
 	-- Link Control
 	f_crtp_echo_data,
-	-- SafeLink
 	f_crtp_safelink_packet,
-	f_crtp_safelink_up,
-	f_crtp_safelink_down,
 }
 
 local param_toc = {}
@@ -1223,6 +1222,17 @@ function handle_platform_port(tree, receive, buffer, channel, size)
 	end
 end
 
+function handle_link_control_port(tree, receive, buffer, channel, size)
+	local port_tree = tree:add(crtp, port_name)
+	if channel == 0 then -- Echo
+		port_tree:add_le(f_crtp_echo_data, buffer(crtp_start + 1):le_uint())
+		undecoded = 0
+	elseif channel == 3 and size == 3 and buffer(crtp_start + 1, 1):uint() == 0x05 then -- Low level safelink packet
+		port_tree:add_le(f_crtp_safelink_packet, true)
+		undecoded = 0
+	end
+end
+
 -- create a function to dissect it, layout:
 -- | link_type | receive| address       | channel | serial   | crtp header | crtp data |
 -- | 1 byte    | 1 byte | 5 or 12 bytes |  1 byte | 16 bytes |    1 byte   |   n bytes |
@@ -1291,15 +1301,7 @@ function crtp.dissector(buffer, pinfo, tree)
 	end
 
 	if crtp_port == Ports.LinkControl then
-		if crtp_channel == 0 then -- Echo
-			local port_tree = tree:add(crtp, channel_name)
-			port_tree:add_le(f_crtp_echo_data, buffer(crtp_start + 1):le_uint())
-			undecoded = 0
-		elseif crtp_channel == 3 and crtp_size == 3 and buffer(crtp_start + 1, 1):uint() == 0x05 then -- Low level safelink packet
-			local port_tree = tree:add(crtp, channel_name)
-			port_tree:add_le(f_crtp_safelink_packet, true)
-			undecoded = 0
-		end
+		handle_link_control_port(tree, receive, buffer, crtp_channel, crtp_size)
 	end
 
 	if crtp_port == Ports.Parameters then
