@@ -6,6 +6,8 @@ local f_crtp_port = ProtoField.uint8("crtp.port", "Port")
 local f_crtp_channel = ProtoField.uint8("crtp.channel", "Channel")
 local f_crtp_size = ProtoField.uint8("crtp.size", "Size")
 local f_crtp_undecoded = ProtoField.string("crtp.undecoded", "Undecoded")
+local f_crtp_safelink_up = ProtoField.uint8("crtp.safelink_up", "SafeLink Up Counter")
+local f_crtp_safelink_down = ProtoField.uint8("crtp.safelink_down", "SafeLink Down Counter")
 
 -- Specialized CRTP service fields
 
@@ -101,10 +103,9 @@ local f_crtp_setpoint_hl_x = ProtoField.float("crtp.setpoint_hl_x", "X")
 local f_crtp_setpoint_hl_y = ProtoField.float("crtp.setpoint_hl_y", "Y")
 local f_crtp_setpoint_hl_z = ProtoField.float("crtp.setpoint_hl_z", "Z")
 
+-- Link control fields (Port 15)
 local f_crtp_echo_data = ProtoField.uint32("crtp.echo_data", "Echo Data")
 local f_crtp_safelink_packet = ProtoField.bool("crtp.safelink_packet", "SafeLink Packet")
-local f_crtp_safelink_up = ProtoField.uint8("crtp.safelink_up", "SafeLink Up Counter")
-local f_crtp_safelink_down = ProtoField.uint8("crtp.safelink_down", "SafeLink Down Counter")
 
 -- All possible fields registered
 crtp.fields = {
