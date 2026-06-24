@@ -105,7 +105,7 @@ local f_crtp_setpoint_hl_z = ProtoField.float("crtp.setpoint_hl_z", "Z")
 
 -- Link control fields (Port 15)
 local f_crtp_echo_data = ProtoField.uint32("crtp.echo_data", "Echo Data")
-local f_crtp_safelink_packet = ProtoField.bool("crtp.safelink_packet", "SafeLink Packet")
+local f_crtp_safelink_type = ProtoField.string("crtp.safelink_type", "SafeLink")
 
 -- All possible fields registered
 crtp.fields = {
@@ -199,7 +199,7 @@ crtp.fields = {
 	f_crtp_platform_arm_request,
 	-- Link Control
 	f_crtp_echo_data,
-	f_crtp_safelink_packet,
+	f_crtp_safelink_type,
 }
 
 local param_toc = {}
@@ -1229,7 +1229,8 @@ function handle_link_control_port(tree, receive, buffer, channel, size)
 		port_tree:add_le(f_crtp_echo_data, buffer(crtp_start + 1):le_uint())
 		undecoded = 0
 	elseif channel == 3 and size == 3 and buffer(crtp_start + 1, 1):uint() == 0x05 then -- Low level safelink packet
-		port_tree:add_le(f_crtp_safelink_packet, true)
+		local safelink_type = (receive == 0) and "Request" or "Acknowledge"
+		port_tree:add_le(f_crtp_safelink_type, safelink_type)
 		undecoded = 0
 	end
 end
