@@ -102,6 +102,9 @@ local f_crtp_setpoint_hl_y = ProtoField.float("crtp.setpoint_hl_y", "Y")
 local f_crtp_setpoint_hl_z = ProtoField.float("crtp.setpoint_hl_z", "Z")
 
 local f_crtp_echo_data = ProtoField.uint32("crtp.echo_data", "Echo Data")
+local f_crtp_safelink_packet = ProtoField.bool("crtp.safelink_packet", "SafeLink Packet")
+local f_crtp_safelink_up = ProtoField.uint8("crtp.safelink_up", "SafeLink Up Counter")
+local f_crtp_safelink_down = ProtoField.uint8("crtp.safelink_down", "SafeLink Down Counter")
 
 -- All possible fields registered
 crtp.fields = {
@@ -193,6 +196,10 @@ crtp.fields = {
 	f_crtp_platform_arm_request,
 	-- Link Control
 	f_crtp_echo_data,
+	-- SafeLink
+	f_crtp_safelink_packet,
+	f_crtp_safelink_up,
+	f_crtp_safelink_down,
 }
 
 local param_toc = {}
@@ -288,6 +295,9 @@ function get_crtp_port_channel_names(port, channel)
 			channel_name = "Echo"
 		elseif channel == 1 then
 			channel_name = "Link Service Source"
+		end
+		elseif channel == 3 then
+			channel_name = "Null Packet"
 		end
 	elseif port == 0xFF then
 		port_name = "ALL"
@@ -1241,9 +1251,14 @@ function crtp.dissector(buffer, pinfo, tree)
 	end
 
 	local subtree = tree:add(crtp, "CRTP Packet")
-	local header = bit.band(buffer(crtp_start, 1):uint(), 0xF3)
+	local raw_header = buffer(crtp_start, 1):uint()
+	local header = bit.band(raw_header, 0xF3)
 	local crtp_port = bit.rshift(bit.band(header, 0xF0), 4)
 	local crtp_channel = bit.band(header, 0x03)
+	local safelink_up = bit.rshift(bit.band(raw_header, 0x08), 3)
+	local safelink_down = bit.rshift(bit.band(raw_header, 0x04), 2)
+	subtree:add_le(f_crtp_safelink_up, safelink_up)
+	subtree:add_le(f_crtp_safelink_down, safelink_down)
 
 	-- Add CRTP packet size:
 	-- link_type + receive + address + channel + serial = crtp_start
@@ -1253,17 +1268,18 @@ function crtp.dissector(buffer, pinfo, tree)
 
 	undecoded = crtp_size - 1
 
-	-- Check for safelink packet
-	if crtp_size == 3 and header == 0xF3 and buffer(crtp_start + 1, 1):uint() == 0x05 then
-		pinfo.cols.info = "SafeLink"
-		return
-	end
-
 	-- Get port and channel name
 	port_name, channel_name = get_crtp_port_channel_names(crtp_port, crtp_channel)
 
-	-- Display port in info column
-	pinfo.cols.info = port_name
+	-- Check for safelink packet
+	if crtp_size == 3 and header == 0xF3 and buffer(crtp_start + 1, 1):uint() == 0x05 then
+		pinfo.cols.info = "SafeLink"
+		subtree:add_le(f_crtp_safelink_packet, true)
+		-- return
+	else
+		-- Display port in info column
+		pinfo.cols.info = port_name
+	end
 
 	-- Add to CRTP tree
 	subtree:add_le(f_crtp_port, crtp_port):append_text(" (" .. port_name .. ")")
