@@ -295,7 +295,6 @@ function get_crtp_port_channel_names(port, channel)
 			channel_name = "Echo"
 		elseif channel == 1 then
 			channel_name = "Link Service Source"
-		end
 		elseif channel == 3 then
 			channel_name = "Null Packet"
 		end
@@ -1297,7 +1296,9 @@ function crtp.dissector(buffer, pinfo, tree)
 			port_tree:add_le(f_crtp_echo_data, buffer(crtp_start + 1):le_uint())
 			undecoded = 0
 		elseif crtp_channel == 3 and crtp_size == 3 and buffer(crtp_start + 1, 1):uint() == 0x05 then -- Low level safelink packet
-			subtree:add_le(f_crtp_safelink_packet, true)
+			local port_tree = tree:add(crtp, channel_name)
+			port_tree:add_le(f_crtp_safelink_packet, true)
+			undecoded = 0
 		end
 	end
 
